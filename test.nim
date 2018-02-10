@@ -2,16 +2,16 @@ import unittest, rx, future, times
 
 type
   UnexpectedOnError = object of Exception
-  TestResult[A] = object
+  TR[A] = object
     elems: seq[A]
     completed: bool
 
-proc tester[A](): ref TestResult[A] =
+proc tester[A](): ref TR[A] =
   new result
   result.elems = @[]
   result.completed = false
 
-proc collect[A](t: ref TestResult[A]): Subscriber[A] =
+proc collect[A](t: ref TR[A]): Subscriber[A] =
   subscriber(
     onNext = proc(a: A) =
       t.elems.add(a),
