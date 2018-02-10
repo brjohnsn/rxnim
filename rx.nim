@@ -5,10 +5,11 @@ export schedulers, core, ops, connectable
 
 
 
-proc println[A](a: A) = echo(a)
-
 when isMainModule:
   import future, sequtils
+
+  proc println[A](a: A) = echo(a)
+
   var o = observable(@[1, 2, 3, 4, 5])
     .map((x: int) => x * x)
     .filter((x: int) => x > 3)
