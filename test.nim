@@ -1,7 +1,6 @@
 import unittest, rx, future, times
 
 type
-  UnexpectedOnError = object of Exception
   TR[A] = object
     elems: seq[A]
     completed: bool

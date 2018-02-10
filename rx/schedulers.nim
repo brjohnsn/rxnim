@@ -8,10 +8,10 @@ type Scheduler* = object
 template millis(t: TimeInterval): auto =
   t.milliseconds + 1000 * t.seconds # fix me
 
-template schedule*(s: Scheduler, p: expr) =
+template schedule*(s: Scheduler, p: untyped) =
   s.scheduleNow(p)
 
-template schedule*(s: Scheduler, p, t: expr) =
+template schedule*(s: Scheduler, p, t: untyped) =
   s.scheduleLater(p, t)
 
 proc immediateScheduler*(): Scheduler =
