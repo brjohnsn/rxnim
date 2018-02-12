@@ -1,5 +1,5 @@
 import threadpool, times
-import rx/schedulers, rx/core, rx/ops, rx/connectable
+import schedulers, core, ops, connectable
 
 export schedulers, core, ops, connectable
 
