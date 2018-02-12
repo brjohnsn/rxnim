@@ -1,6 +1,7 @@
 type
   Observable*[A] = object
     onSubscribe: proc(s: Subscriber[A])
+
   Subscriber*[A] = object
     onNext*: proc(a: A)
     onComplete*: proc()
@@ -26,9 +27,9 @@ proc empty*[A](): Observable[A] =
 
 proc single*[A](a: A): Observable[A] = observable(@[a])
 
-proc repeat*[A](a: A): Observable[A] =
+proc repeat*[A](a: A, cnt: int = 1000): Observable[A] =
   create(proc(s: Subscriber[A]) =
-    while true:
+    for i in 0..<cnt:
       s.onNext(a)
   )
 

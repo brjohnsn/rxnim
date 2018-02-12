@@ -13,7 +13,7 @@ when isMainModule:
   var o = observable(@[1, 2, 3, 4, 5])
     .map((x: int) => x * x)
     .filter((x: int) => x > 3)
-    .delay((x: int) => 100 * x)
+    .delay((x: int) => 10 * x)
     .sendToNewThread()
     .concat(single(6))
     .concat(single(3))

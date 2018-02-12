@@ -31,18 +31,14 @@ proc take*[A](o: Observable[A], n: int): Observable[A] =
   var count = 0
   create(proc(s: Subscriber[A]) =
     o.subscribe(subscriber(
-      onNext = proc(a: A) =
-        if count <= n - 1:
-          count += 1
+      proc(a: A) =
+        if count < n:
+          inc count
           s.onNext(a)
-        elif count == n:
+        else:
           s.onComplete(),
-      onComplete = proc() =
-        if count < n:
-          s.onComplete(),
-      onError = proc(e: ref Exception) =
-        if count < n:
-          s.onError(e)
+      s.onComplete,
+      s.onError
     ))
   )
 
@@ -116,47 +112,62 @@ proc buffer*[A](o: Observable[A], t: TimeInterval): Observable[seq[A]] =
   let millis = t.milliseconds + 1000 * t.seconds # fix this
 
   create(proc(s: Subscriber[seq[A]]) =
-    var ch: Channel[A]
-    ch.open()
+    var channel: Channel[A];
+    channel.open()
+    try:
 
-    proc readFromOtherThread() {.thread.} =
-      while true:
-        let n = ch.peek()
-        var buffer = newSeq[A](n)
-        for i in 0 .. < n:
-          buffer[i] = ch.recv()
-        s.onNext(buffer)
-        sleep(millis)
+      proc readFromOtherThread(ch: ptr Channel[A], s1: Subscriber[seq[A]], m: int) {.thread.} =
+        while true:
+          let n = ch[].peek()
+          if n < 0: break
+          var buffer = newSeq[A](n)
+          for i in 0 .. < n:
+            buffer[i] = ch[].recv()
+          s1.onNext(buffer)
+          sleep(m)
 
-    spawn readFromOtherThread()
+      spawn readFromOtherThread(addr channel, s, millis)
 
-    o.subscribe(subscriber(
-      onNext = proc(a: A) =
-        ch.send(a),
-      onComplete = s.onComplete,
-      onError = s.onError
-    ))
+      o.subscribe(subscriber(
+        onNext = proc(a: A) =
+          channel.send(a),
+        onComplete = s.onComplete,
+        onError = s.onError
+      ))
+
+    finally:
+      while channel.peek > 0:
+        sleep(1)
+      channel.close()
   )
 
 proc sendToNewThread*[A](o: Observable[A]): Observable[A] =
 
   create(proc(s: Subscriber[A]) =
-    var ch: Channel[A]
-    ch.open()
+    var channel: Channel[A];
+    channel.open()
+    try:
 
-    proc readFromOtherThread() {.thread.} =
-      while true:
-        let a = ch.recv()
-        s.onNext(a)
+      proc readFromOtherThread(ch: ptr Channel[A], s: Subscriber[A]) {.thread.} =
+        while true:
+          let len = ch[].peek()
+          if len < 0: break
+          if len == 0:
+            sleep(1)
+          for i in 0..<len:
+            s.onNext(ch[].recv())
 
-    # var th: Thread[void]
-    # createThread[void](th, readFromOtherThread)
-    spawn readFromOtherThread()
+      spawn readFromOtherThread(addr channel, s)
 
-    o.subscribe(subscriber(
-      onNext = proc(a: A) =
-        ch.send(a),
-      onComplete = s.onComplete,
-      onError = s.onError
-    ))
+      o.subscribe(subscriber(
+        onNext = proc(a: A) =
+          channel.send(a),
+        onComplete = s.onComplete,
+        onError = s.onError
+      ))
+
+    finally:
+      while channel.peek > 0:
+        sleep(1)
+      channel.close()
   )
