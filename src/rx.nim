@@ -1,5 +1,5 @@
 import threadpool, times
-import schedulers, core, ops, connectable
+import rxpkg/schedulers, rxpkg/core, rxpkg/ops, rxpkg/connectable
 
 export schedulers, core, ops, connectable
 
