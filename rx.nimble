@@ -7,14 +7,12 @@ license       = "MIT"
 binDir        = "bin"
 srcDir        = "src"
 bin           = @["rx"]
-skipDirs      = @["tests"]
 
 # Dependencies
 
 requires "nim >= 0.17.0"
 
 task test, "test rx":
-  --threads: on
   --run
   --path: "src"
   setCommand "c", "tests/test.nim"
