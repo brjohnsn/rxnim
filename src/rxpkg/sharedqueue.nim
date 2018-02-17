@@ -41,7 +41,6 @@ when isMainModule:
   x.atomicSend(2)
   x.atomicSend(3)
 
-  spawn:
-    localEcho(x)
+  spawn localEcho(x)
 
   sync()

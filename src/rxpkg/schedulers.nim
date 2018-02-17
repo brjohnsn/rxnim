@@ -20,4 +20,4 @@ proc immediateScheduler*(): Scheduler =
     sleep(t.millis)
     p()
   result.now = proc(): Time =
-    epochTime().fromSeconds()
+    getTime()
