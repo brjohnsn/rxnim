@@ -10,7 +10,7 @@ bin           = @["rx"]
 
 # Dependencies
 
-requires "nim >= 0.17.0 & < 0.18.0"
+requires "nim >= 0.18.0"
 
 task test, "test rx":
   --run
